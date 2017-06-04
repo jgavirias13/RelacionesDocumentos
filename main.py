@@ -36,6 +36,7 @@ def main():
     argumentos = parser.parse_args()
     if argumentos.PATH:
         listaArchivos = ls(argumentos.PATH) #Tomar todos los archivos de la carpeta
+        cantidadDocumentos = len(listaArchivos)
         for nombreArchivo in listaArchivos:
             ruta = ruta_completa(argumentos.PATH, nombreArchivo) #Tomar la ruta a cada archivo
             documento = open(ruta, 'r') #Abrir el archivo
