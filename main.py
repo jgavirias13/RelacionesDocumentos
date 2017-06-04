@@ -15,6 +15,19 @@ def ruta_completa(ruta, nombreArchivo):
         strRuta = ruta + nombreArchivo
     return strRuta
 
+#Funcion para determinar el numero de veces que aparece una palabra en un documento.
+def frecuencia_termino(documento):
+    frec_term = {}
+    for linea in documento:
+        palabras = linea.split(" ")
+        for palabra in palabras:
+            palabra = palabra.replace("\n", '')
+            if palabra not in frec_term:
+                frec_term[palabra] = 1
+            else:
+                frec_term[palabra] += 1
+    return frec_term
+
 def main():
     #Se define el parser para tomar parametros por terminal
     parser = argparse.ArgumentParser(description='Programa para hacer relaciones entre documentos '
@@ -26,7 +39,8 @@ def main():
         for nombreArchivo in listaArchivos:
             ruta = ruta_completa(argumentos.PATH, nombreArchivo) #Tomar la ruta a cada archivo
             documento = open(ruta, 'r') #Abrir el archivo
-            print documento.read() #Imprimir su contenido
+            print frecuencia_termino(documento)
+            #print documento.read() #Imprimir su contenido
 
 if __name__ == '__main__':
     main()
