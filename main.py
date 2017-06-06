@@ -7,9 +7,9 @@ from string import punctuation
 import unicodedata
 import math
 import numpy as np
+import json
 
 stemmer = SpanishStemmer()
-
 
 #Tomado de https://es.stackoverflow.com/questions/24278/c%C3%B3mo-listar-todos-los-archivos-de-una-carpeta-usando-python
 #Creada por el usuario Mariano de Stackoverflow
@@ -89,7 +89,7 @@ def top(matriz_correlacion, cantidad_documentos, lista_documentos):
             documentos_relacionados.append(lista_documentos[tupla[1]])
         top_dic[nombre_Documento] = documentos_relacionados
         i += 1
-    return top_dic
+    return json.dumps(top_dic, indent=4)
 
 
 def main():
@@ -130,9 +130,13 @@ def main():
                 correlacion[j][i] = correlacion[i][j]
                 j+=1
             i+=1
-        print correlacion
-        print listaArchivos
-        print top(correlacion,cantidadDocumentos,listaArchivos)
+        #print correlacion
+        #print listaArchivos
+        archivoSalida = open('Resultados.json', 'w')
+        archivoSalida.write(top(correlacion,cantidadDocumentos,listaArchivos))
+        archivoSalida.close()
+
+
 
 
 if __name__ == '__main__':
