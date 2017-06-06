@@ -6,6 +6,7 @@ from nltk.stem.snowball import SpanishStemmer
 from string import punctuation
 import unicodedata
 import math
+import numpy as np
 
 stemmer = SpanishStemmer()
 
@@ -51,11 +52,44 @@ def frecuencia_termino(documento):
             palabraLimpia = limpiar_palabra(palabra.decode('utf-8'))
             palabraLimpia = stemmer.stem(palabraLimpia) #Se sacan las raices de las palabras
             if palabraLimpia not in frec_term:
-                if palabraLimpia not in stopwords.words('spanish'):
+                if palabraLimpia not in stopwords.words('spanish'): #Se eliminan las stopwords
                     frec_term[palabraLimpia] = 1
             else:
                 frec_term[palabraLimpia] += 1
     return frec_term
+
+
+#Funcion para sacar el coeficiente de jaccard
+def jaccard(tf1, tf2):
+    ta = np.array(tf1.values())
+    tb = np.array(tf2.values())
+    magnitud_ta = np.linalg.norm(ta)
+    magnitud_tb = np.linalg.norm(tb)
+    ppunto = np.dot(ta,tb)
+    jaccard_cof = ppunto/((magnitud_ta**2 + magnitud_tb**2)- ppunto)
+    return jaccard_cof
+
+#Funcion para sacar el top de las relaciones entre documentos
+def top(matriz_correlacion, cantidad_documentos, lista_documentos):
+    top_dic = {}
+    i = j = 0
+    for nombre_Documento in lista_documentos:
+        lista_tuplas = []
+        j = 0
+        while j < cantidad_documentos:
+            if(i == j):
+                j += 1
+                continue
+            else:
+                lista_tuplas.append((matriz_correlacion[i][j],j))
+                j +=1
+        lista_tuplas = sorted(lista_tuplas, reverse=True)
+        documentos_relacionados = []
+        for tupla in lista_tuplas:
+            documentos_relacionados.append(lista_documentos[tupla[1]])
+        top_dic[nombre_Documento] = documentos_relacionados
+        i += 1
+    return top_dic
 
 
 def main():
@@ -73,7 +107,7 @@ def main():
             ruta = ruta_completa(argumentos.PATH, nombreArchivo) #Tomar la ruta a cada archivo
             documento = open(ruta, 'r') #Abrir el archivo
             vectores_tf[nombreArchivo] = frecuencia_termino(documento) #Se saca el vector tf de cada documento
-            for palabra in vectores_tf[nombreArchivo]: #Se recorre las palabras del documento
+            for palabra in vectores_tf[nombreArchivo]: #Se recorre las palabras del documento para construir vt
                 if palabra not in vector_terminos: #Se aumenta la frecuencia de la palabra
                     vector_terminos[palabra] = 1
                 else:
@@ -87,7 +121,18 @@ def main():
                 else: #Aplicacion de la formula de tfidf mostrada en el documento
                     vector_tfidf[palabra] = vectores_tf[documento][palabra]*math.log(cantidadDocumentos/vector_terminos[palabra])
             vectores_tfidf[documento] = vector_tfidf
-        print  vectores_tfidf
+        correlacion = np.zeros(shape=(cantidadDocumentos, cantidadDocumentos))
+        i = j = 0
+        while i < cantidadDocumentos:
+            j = i
+            while j < cantidadDocumentos:
+                correlacion[i][j] = jaccard(vectores_tfidf[listaArchivos[i]], vectores_tfidf[listaArchivos[j]])
+                correlacion[j][i] = correlacion[i][j]
+                j+=1
+            i+=1
+        print correlacion
+        print listaArchivos
+        print top(correlacion,cantidadDocumentos,listaArchivos)
 
 
 if __name__ == '__main__':
