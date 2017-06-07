@@ -122,7 +122,7 @@ def main():
                     vector_tfidf[palabra] = vectores_tf[documento][palabra]*math.log(cantidadDocumentos/vector_terminos[palabra])
             vectores_tfidf[documento] = vector_tfidf
         correlacion = np.zeros(shape=(cantidadDocumentos, cantidadDocumentos))
-        i = j = 0
+        i = 0
         while i < cantidadDocumentos:
             j = i
             while j < cantidadDocumentos:
