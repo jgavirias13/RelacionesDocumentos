@@ -8,6 +8,7 @@ import unicodedata
 import math
 import numpy as np
 import json
+from time import time
 
 stemmer = EnglishStemmer()
 
@@ -49,7 +50,7 @@ def frecuencia_termino(documento):
     for linea in documento:
         palabras = linea.split(" ")
         for palabra in palabras:
-            palabraLimpia = limpiar_palabra(palabra.decode('utf-8'))
+            palabraLimpia = limpiar_palabra(palabra.decode('latin1'))
             palabraLimpia = stemmer.stem(palabraLimpia) #Se sacan las raices de las palabras
             if palabraLimpia not in frec_term:
                 if palabraLimpia not in stopwords.words('english'): #Se eliminan las stopwords
@@ -93,6 +94,7 @@ def top(matriz_correlacion, cantidad_documentos, lista_documentos):
 
 
 def main():
+    tiempo_inicial = time()
     #Se define el parser para tomar parametros por terminal
     parser = argparse.ArgumentParser(description='Programa para hacer relaciones entre documentos '
                                                 'y sacar un listado de los mas cercanos a cada uno')
@@ -133,6 +135,9 @@ def main():
         #print correlacion
         #print listaArchivos
         #print vector_terminos
+        tiempo_final = time()
+        tiempo_ejecucion = tiempo_final - tiempo_inicial
+        print 'El tiempo de ejecucion fue: ', tiempo_ejecucion
         archivoSalida = open('Resultados.json', 'w')
         archivoSalida.write(top(correlacion,cantidadDocumentos,listaArchivos))
         archivoSalida.close()

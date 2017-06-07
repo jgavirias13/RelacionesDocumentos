@@ -50,7 +50,7 @@ def frecuencia_termino(documento):
     for linea in documento:
         palabras = linea.split(" ")
         for palabra in palabras:
-            palabraLimpia = limpiar_palabra(palabra.decode('utf-8'))
+            palabraLimpia = limpiar_palabra(palabra.decode('latin1'))
             palabraLimpia = stemmer.stem(palabraLimpia) #Se sacan las raices de las palabras
             if palabraLimpia not in frec_term:
                 if palabraLimpia not in stopwords.words('english'): #Se eliminan las stopwords
@@ -99,6 +99,7 @@ def main():
     parser.add_argument('PATH', help='Carpeta de donde se tomaran todos los documentos')
     argumentos = parser.parse_args()
     if argumentos.PATH:
+        wt = MPI.Wtime()
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         size = comm.Get_size()
@@ -172,7 +173,9 @@ def main():
         #Cantidad archivos: Total de documentos
         relaciones_documentos = top(correlacion, cantidadArchivos, todos_archivos, listaArchivos)
         diccionarios = comm.gather(relaciones_documentos, root=0)
+        wt = MPI.Wtime() - wt
         if rank == 0:
+            print 'El tiempo de ejecucion fue: ', wt
             for diccionario in diccionarios:
                 relaciones_documentos.update(diccionario)
             archivoSalida = open('ResultadosParalelo.json', 'w')
